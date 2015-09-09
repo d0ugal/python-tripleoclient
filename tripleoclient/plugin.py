@@ -16,8 +16,10 @@
 """OpenStackClient Plugin interface"""
 
 import logging
+import os
 
 from ironicclient import client as ironic_client
+from openstackclient.common import exceptions as osc_exc
 from openstackclient.common import utils
 from tuskarclient import client as tuskar_client
 
@@ -32,6 +34,10 @@ API_VERSION_OPTION = 'os_tripleoclient_api_version'
 API_VERSIONS = {
     '1': 'tripleoclient.plugin'
 }
+
+if os.geteuid() == 0:
+    raise osc_exc.CommandError('This command cannot run under root user.'
+                               ' Switch to normal user.')
 
 
 def make_client(instance):
