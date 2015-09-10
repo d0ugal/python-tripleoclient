@@ -53,7 +53,8 @@ class BuildOvercloudImage(command.Command):
         'stable-interface-names',
         'grub2-deprecated',
         '-p python-psutil,python-debtcollector,plotnetcfg,sos,'
-        'python-cisco-networking,python-UcsSdk'
+        'python-cisco-networking,python-UcsSdk,python-networking-bigswitch,'
+        'openstack-neutron-bigswitch-agent,openstack-neutron-bigswitch-lldp'
     ]
 
     OVERCLOUD_FULL_DIB_EXTRA_ARGS = [
