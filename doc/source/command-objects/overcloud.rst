@@ -45,6 +45,7 @@ Deploy an overcloud stack
         [--reg-org REG_ORG] [--reg-force]
         [--reg-sat-url REG_SAT_URL]
         [--reg-activation-key REG_ACTIVATION_KEY]
+        [--no-debug]
 
 .. option:: --plan <name or UUID>
 
@@ -201,3 +202,7 @@ Deploy an overcloud stack
 .. option:: --reg-activation-key <key>
 
     Activation key to use for registration.
+
+.. option:: --no-debug
+
+    Disable debug logging in Heat.

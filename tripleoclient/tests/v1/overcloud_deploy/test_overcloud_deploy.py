@@ -83,9 +83,10 @@ class TestDeployOvercloud(fakes.TestDeployOvercloud):
                        mock_create_tempest_deployer_input,
                        mock_deploy_postconfig):
 
-        arglist = ['--templates', '--ceph-storage-scale', '3']
+        arglist = ['--templates', '--ceph-storage-scale', '3', '--no-debug']
         verifylist = [
             ('templates', '/usr/share/openstack-tripleo-heat-templates/'),
+            ('no_debug', True)
         ]
 
         mock_create_cephx_key.return_value = "cephx_key"
@@ -135,7 +136,7 @@ class TestDeployOvercloud(fakes.TestDeployOvercloud):
             'CinderPassword': 'password',
             'CloudName': 'overcloud',
             'controllerImage': 'overcloud-full',
-            'Debug': 'True',
+            'Debug': 'False',
             'ExtraConfig': '{}',
             'GlancePassword': 'password',
             'HeatPassword': 'password',

@@ -200,6 +200,9 @@ class DeployOvercloud(command.Command):
         net = network_client.api.find_attr('networks', 'ctlplane')
         parameters['NeutronControlPlaneID'] = net['id']
 
+        if args.no_debug:
+            parameters['Debug'] = 'False'
+
         if args.templates:
             param_args = (
                 ('NeutronPublicInterface', 'neutron_public_interface'),
@@ -1148,6 +1151,11 @@ class DeployOvercloud(command.Command):
             '--reg-activation-key',
             default='',
             help=_('Activation key to use for registration.')
+        )
+        parser.add_argument(
+            '--no-debug',
+            action='store_true',
+            help=_('Disable debug logging in Heat.')
         )
 
         return parser
