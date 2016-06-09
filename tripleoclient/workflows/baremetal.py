@@ -67,3 +67,75 @@ def provide(clients, **workflow_input):
         else:
             print('Failed to set nodes to available state.')
             print(provide_payload['message'])
+
+
+def introspect_manageable_nodes(clients, **workflow_input):
+    """Introspect all manageable nodes
+
+    Run the tripleo.baremetal.v1.introspect_manageable_nodes Mistral workflow.
+    """
+
+    workflow_client = clients.workflow_engine
+    tripleoclients = clients.tripleoclient
+    queue_name = workflow_input['queue_name']
+
+    introspect_exec = workflow_client.executions.create(
+        'tripleo.baremetal.v1.introspect_manageable_nodes',
+        workflow_input={"queue_name": queue_name, }
+    )
+
+    print("Waiting for introspection to finish...")
+
+    errors = []
+    successful_node_uuids = set()
+
+    with tripleoclients.messaging_websocket(queue_name) as ws:
+        introspect_payload = ws.wait_for_message(introspect_exec.id)
+
+    if introspect_payload['status'] == 'SUCCESS':
+        introspected_nodes = introspect_payload['introspected_nodes']
+        for node_uuid, status in introspected_nodes.items():
+            if status['error'] is None:
+                print(("Introspection for UUID {0} finished"
+                       "successfully.").format(node_uuid))
+                successful_node_uuids.add(node_uuid)
+            else:
+                print(("Introspection for UUID {0} finished with error"
+                       ": {1}").format(node_uuid, status['error']))
+                errors.append("%s: %s" % (node_uuid, status['error']))
+    else:
+        print(introspect_payload['message'])
+        raise Exception('Exception registering nodes.')
+        return
+
+    if errors:
+        raise exceptions.IntrospectionError(
+            "Introspection completed with errors:\n%s" % '\n'
+            .join(errors))
+    else:
+        print("Introspection completed.")
+
+
+def provide_manageable_nodes(clients, **workflow_input):
+    """Provide all manageable Nodes
+
+    Run the tripleo.baremetal.v1.provide_manageable_nodes Mistral workflow.
+    """
+
+    workflow_client = clients.workflow_engine
+    tripleoclients = clients.tripleoclient
+    queue_name = workflow_input['queue_name']
+
+    provide_exec = workflow_client.executions.create(
+        'tripleo.baremetal.v1.provide_manageable_nodes',
+        workflow_input={"queue_name": queue_name, }
+    )
+
+    with tripleoclients.messaging_websocket(queue_name) as ws:
+        provide_payload = ws.wait_for_message(provide_exec.id)
+
+    if provide_payload['status'] != 'SUCCESS':
+        print(provide_payload['message'])
+        raise Exception('Exception providing nodes.')
+    else:
+        print(provide_payload['message'])

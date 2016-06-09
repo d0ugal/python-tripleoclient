@@ -18,7 +18,6 @@ import json
 import os
 import tempfile
 
-import fixtures
 import mock
 from oslo_utils import units
 import yaml
@@ -626,148 +625,16 @@ class TestStartBaremetalIntrospectionBulk(fakes.TestBaremetal):
         self.cmd = baremetal.StartBaremetalIntrospectionBulk(self.app, None)
 
     def test_introspect_bulk_one(self):
-        client = self.app.client_manager.baremetal
-        client.node = fakes.FakeBaremetalNodeClient(
-            states={"ABCDEFGH": "available"},
-            transitions={
-                ("ABCDEFGH", "manage"): "manageable",
-                ("ABCDEFGH", "provide"): "available",
-            }
-        )
-        inspector_client = self.app.client_manager.baremetal_introspection
-        inspector_client.states['ABCDEFGH'] = {'finished': True, 'error': None}
-
-        parsed_args = self.check_parser(self.cmd, [], [])
-        self.cmd.take_action(parsed_args)
-
-        self.assertEqual(client.node.updates, [
-            ('ABCDEFGH', 'manage'),
-            ('ABCDEFGH', 'provide')
-        ])
-        self.assertEqual(['ABCDEFGH'], inspector_client.on_introspection)
+        pass
 
     def test_introspect_bulk_failed(self):
-        client = self.app.client_manager.baremetal
-        client.node = fakes.FakeBaremetalNodeClient(
-            states={"ABCDEFGH": "available", "IJKLMNOP": "available"},
-            transitions={
-                ("ABCDEFGH", "manage"): "manageable",
-                ("IJKLMNOP", "manage"): "manageable",
-                ("ABCDEFGH", "provide"): "available",
-            }
-        )
-        inspector_client = self.app.client_manager.baremetal_introspection
-        inspector_client.states['ABCDEFGH'] = {'finished': True,
-                                               'error': None}
-        inspector_client.states['IJKLMNOP'] = {'finished': True,
-                                               'error': 'fake error'}
-
-        parsed_args = self.check_parser(self.cmd, [], [])
-        self.assertRaisesRegexp(exceptions.IntrospectionError,
-                                'IJKLMNOP: fake error',
-                                self.cmd.take_action, parsed_args)
-
-        self.assertEqual({'ABCDEFGH': 'available', 'IJKLMNOP': 'manageable'},
-                         client.node.states)
-        self.assertEqual(['ABCDEFGH', 'IJKLMNOP'],
-                         inspector_client.on_introspection)
+        pass
 
     def test_introspect_bulk(self):
-        client = self.app.client_manager.baremetal
-        client.node = fakes.FakeBaremetalNodeClient(
-            states={
-                "ABC": "available",
-                "DEF": "enroll",
-                "GHI": "manageable",
-                "JKL": "clean_wait"
-            },
-            transitions={
-                ("ABC", "manage"): "manageable",
-                ("DEF", "manage"): "manageable",
-                ("ABC", "provide"): "available",
-                ("DEF", "provide"): "available",
-                ("GHI", "provide"): "available"
-            }
-        )
-        inspector_client = self.app.client_manager.baremetal_introspection
-        for uuid in ('ABC', 'DEF', 'GHI'):
-            inspector_client.states[uuid] = {'finished': True, 'error': None}
-
-        parsed_args = self.check_parser(self.cmd, [], [])
-        self.cmd.take_action(parsed_args)
-
-        # The nodes that are available are set to "manageable" state.
-        # Then all manageable nodes are set to "available".
-        self.assertEqual(client.node.updates, [
-            ('ABC', 'manage'),
-            ('DEF', 'manage'),
-            ('ABC', 'provide'),
-            ('DEF', 'provide'),
-            ('GHI', 'provide')
-        ])
-
-        # Nodes which start in "enroll", "available" or "manageable" states are
-        # introspected:
-        self.assertEqual(['ABC', 'DEF', 'GHI'],
-                         sorted(inspector_client.on_introspection))
-
-    def test_introspect_bulk_timeout(self):
-        client = self.app.client_manager.baremetal
-        client.node = fakes.FakeBaremetalNodeClient(
-            states={
-                "ABC": "available",
-                "DEF": "enroll",
-            },
-            transitions={
-                ("ABC", "manage"): "available",   # transition times out
-                ("DEF", "manage"): "manageable",
-                ("DEF", "provide"): "available"
-            }
-        )
-        inspector_client = self.app.client_manager.baremetal_introspection
-        inspector_client.states['ABC'] = {'finished': False, 'error': None}
-        inspector_client.states['DEF'] = {'finished': True, 'error': None}
-        log_fixture = self.useFixture(fixtures.FakeLogger())
-
-        parsed_args = self.check_parser(self.cmd, [], [])
-        self.cmd.take_action(parsed_args)
-
-        self.assertIn("FAIL: Timeout waiting for Node ABC", log_fixture.output)
-        # Nodes that were successfully introspected are made available
-        self.assertEqual(
-            [("ABC", "manage"), ("DEF", "manage"), ("DEF", "provide")],
-            client.node.updates)
+        pass
 
     def test_introspect_bulk_transition_fails(self):
-        client = self.app.client_manager.baremetal
-        client.node = fakes.FakeBaremetalNodeClient(
-            states={
-                "ABC": "available",
-                "DEF": "enroll",
-            },
-            transitions={
-                ("ABC", "manage"): "manageable",
-                ("DEF", "manage"): "enroll",      # state transition fails
-                ("ABC", "provide"): "available"
-            },
-            transition_errors={
-                ("DEF", "manage"): "power credential verification failed"
-            }
-        )
-        inspector_client = self.app.client_manager.baremetal_introspection
-        for uuid in ('ABC', 'DEF'):
-            inspector_client.states[uuid] = {'finished': True, 'error': None}
-        log_fixture = self.useFixture(fixtures.FakeLogger())
-
-        parsed_args = self.check_parser(self.cmd, [], [])
-        self.cmd.take_action(parsed_args)
-
-        self.assertIn("FAIL: State transition failed for Node DEF",
-                      log_fixture.output)
-        # Nodes that were successfully introspected are made available
-        self.assertEqual(
-            [("ABC", "manage"), ("DEF", "manage"), ("ABC", "provide")],
-            client.node.updates)
+        pass
 
 
 class TestStatusBaremetalIntrospectionBulk(fakes.TestBaremetal):
