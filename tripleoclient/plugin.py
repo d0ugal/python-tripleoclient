@@ -152,7 +152,4 @@ class ClientWrapper(object):
 
     def messaging_websocket(self, queue_name='tripleo'):
         """Returns a websocket for the messaging service"""
-        if self._messaging_websocket is not None:
-            return self._messaging_websocket
-        self._messaging_websocket = WebsocketClient(self._instance, queue_name)
-        return self._messaging_websocket
+        return WebsocketClient(self._instance, queue_name)
