@@ -139,3 +139,5 @@ UNUSED_PARAMETER_EXCLUDES_RE = ['^(Docker|Container).*Image$',
 EXPORT_PASSWORD_EXCLUDE_PATTERNS = [
     'ceph.*'
 ]
+
+TRIPLEO_ANSIBLE_PLAYBOOKS = "/usr/share/ansible/tripleo-playbooks/"

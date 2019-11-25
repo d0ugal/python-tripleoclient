@@ -255,8 +255,20 @@ def run_ansible_playbook(logger,
 
         cmd.extend(['-c', connection, play])
 
+        print(cmd)
+
         proc = run_command_and_log(logger, cmd, env=env, retcode_only=False)
-        proc.wait()
+        while True:
+            try:
+                line = proc.stdout.readline()
+            except StopIteration:
+                break
+            if line != b'':
+                if isinstance(line, bytes):
+                    line = line.decode('utf-8')
+                print(line.rstrip())
+            else:
+                break
         cleanup and os.unlink(tmp_config)
         if proc.returncode != 0:
             raise RuntimeError(proc.stdout.read())
